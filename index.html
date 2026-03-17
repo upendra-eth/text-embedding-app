@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Text Embeddings — Interactive Beginner's Guide</title>
+  <meta name="description" content="Learn how text gets transformed into numbers (vectors) for machine learning. Interactive demos, visualizations, and math explained from first principles." />
+  <link rel="stylesheet" href="style.css" />
+  <!-- Chart.js from CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <!-- MathJax for formula rendering -->
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+</head>
+<body>
+
+<!-- ╔══════════════════════════════════════════╗ -->
+<!-- ║               NAVIGATION                ║ -->
+<!-- ╚══════════════════════════════════════════╝ -->
+<nav class="topnav">
+  <div class="nav-logo"><span class="gradient-text">⟨vec⟩</span> Text Embeddings</div>
+  <div class="nav-links">
+    <a href="#what"       class="nav-link">What?</a>
+    <a href="#types"      class="nav-link">Data Types</a>
+    <a href="#tokenize"   class="nav-link">Tokenize</a>
+    <a href="#math"       class="nav-link">Math</a>
+    <a href="#space"      class="nav-link">Space</a>
+    <a href="#similarity" class="nav-link">Similarity</a>
+    <a href="#pooling"    class="nav-link">Pooling</a>
+  </div>
+</nav>
+
+<!-- ╔══════════════════════════════════════════╗ -->
+<!-- ║                  HERO                   ║ -->
+<!-- ╚══════════════════════════════════════════╝ -->
+<section class="hero" id="top">
+  <div class="hero-glow hero-glow-1"></div>
+  <div class="hero-glow hero-glow-2"></div>
+  <div class="hero-glow hero-glow-3"></div>
+
+  <div class="hero-badge">📖 Interactive Learning Guide · Beginner Friendly</div>
+
+  <h1>
+    How Does Text<br/>
+    Become <span class="gradient-text">Numbers?</span>
+  </h1>
+
+  <p class="hero-subtitle">
+    A hands-on guide to <strong>text embeddings</strong> — the technology that lets machines understand
+    language by turning words into mathematical vectors. Includes live demos, visualizations, and
+    the exact math behind every step.
+  </p>
+
+  <div class="hero-pills">
+    <div class="pill"><span class="pill-icon">🔤</span> Tokenization</div>
+    <div class="pill"><span class="pill-icon">🔢</span> Token IDs</div>
+    <div class="pill"><span class="pill-icon">📐</span> Cosine Similarity</div>
+    <div class="pill"><span class="pill-icon">🎯</span> Mean Pooling</div>
+    <div class="pill"><span class="pill-icon">🌌</span> Vector Space</div>
+    <div class="pill"><span class="pill-icon">⚡</span> Live Demos</div>
+  </div>
+
+  <div class="hero-scroll-hint">
+    <span>▼ Scroll to start learning</span>
+  </div>
+</section>
+
+
+<!-- ╔══════════════════════════════════════════╗ -->
+<!-- ║   SECTION 1: WHAT IS A TEXT EMBEDDING?  ║ -->
+<!-- ╚══════════════════════════════════════════╝ -->
+<section class="section" id="what">
+  <div class="section-header">
+    <div class="section-number">SECTION 01</div>
+    <h2>What is a <span class="gradient-text">Text Embedding?</span></h2>
+    <p class="section-desc">
+      Computers can't read words — they only understand numbers. An <strong>embedding</strong> is a
+      list of decimal numbers (a <em>vector</em>) that represents the <em>meaning</em> of a word or sentence.
+      Similar meanings → similar numbers → close together in space.
+    </p>
+  </div>
+
+  <div class="grid-2" style="gap:24px; margin-bottom: 32px;">
+    <div class="card card-gradient">
+      <div style="font-size:2.5rem;margin-bottom:12px;">🗺️</div>
+      <div style="font-weight:700;margin-bottom:8px;">The GPS Analogy</div>
+      <p style="color:var(--text-secondary);font-size:14px;line-height:1.7;">
+        Just like GPS coordinates (40.71°N, 74.00°W) pinpoint New York on a map,
+        a text embedding like <code>[0.32, -0.14, 0.87, ...]</code> pinpoints
+        "cat" in <em>meaning space</em>. Cities close on a map → similar coordinates.
+        Words with similar meanings → similar vectors.
+      </p>
+    </div>
+    <div class="card card-gradient">
+      <div style="font-size:2.5rem;margin-bottom:12px;">🎨</div>
+      <div style="font-weight:700;margin-bottom:8px;">The Colour Analogy</div>
+      <p style="color:var(--text-secondary);font-size:14px;line-height:1.7;">
+        Any colour can be described as 3 numbers: RGB (255, 0, 0) = red.
+        Similarly, any word can be described as hundreds of numbers.
+        "King" and "Queen" would have similar numbers, except for certain
+        dimensions that encode <em>gender</em>.
+      </p>
+    </div>
+  </div>
+
+  <div class="highlight-bar">
+    <div class="hb-icon">💡</div>
+    <div class="hb-text">
+      <strong>The Big Idea:</strong> After training on billions of sentences, a model learns that
+      "cat" and "kitten" should have similar vectors, "hot" and "cold" should be opposite,
+      and <em>King − Man + Woman ≈ Queen</em> (the famous Word2Vec arithmetic!).
+    </div>
+  </div>
+
+  <div class="grid-3" style="margin-top:24px;">
+    <div class="stat-card">
+      <div class="stat-value">384</div>
+      <div class="stat-label">Dimensions in MiniLM</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">30K+</div>
+      <div class="stat-label">Tokens in Vocabulary</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">±1.0</div>
+      <div class="stat-label">Cosine Similarity Range</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ╔══════════════════════════════════════════╗ -->
+<!-- ║   SECTION 2: THE DATA TYPE JOURNEY      ║ -->
+<!-- ╚══════════════════════════════════════════╝ -->
+<section class="section" id="types">
+  <div class="section-header">
+    <div class="section-number">SECTION 02</div>
+    <h2>The <span class="gradient-text">Data Type Journey</span></h2>
+    <p class="section-desc">
+      Text goes through 5 exact type transformations before becoming an embedding.
+      Each step changes the data type and structure. Let's trace <em>"The cat sat"</em>.
+    </p>
+  </div>
+
+  <!-- Type Flow Diagram -->
+  <div class="card" style="overflow-x:auto;margin-bottom:28px;">
+    <div class="type-flow">
+      <!-- Step 1 -->
+      <div class="type-step">
+        <div class="type-box">
+          <div class="type-label">Input</div>
+          <div class="type-name">string</div>
+          <div class="type-example">"The cat sat"</div>
+        </div>
+        <div style="font-size:11px;color:var(--text-muted);text-align:center;margin-top:6px;">
+          UTF-8 text buffer<br/>~12 bytes
+        </div>
+      </div>
+
+      <div class="type-arrow">→</div>
+
+      <!-- Step 2 -->
+      <div class="type-step">
+        <div class="type-box">
+          <div class="type-label">After Tokenize</div>
+          <div class="type-name">string[]</div>
+          <div class="type-example">["the","cat","sat"]</div>
+        </div>
+        <div style="font-size:11px;color:var(--text-muted);text-align:center;margin-top:6px;">
+          Array of subword strings<br/>N tokens
+        </div>
+      </div>
+
+      <div class="type-arrow">→</div>
+
+      <!-- Step 3 -->
+      <div class="type-step">
+        <div class="type-box">
+          <div class="type-label">Token IDs</div>
+          <div class="type-name">int64[]</div>
+          <div class="type-example">[1, 100, 3901]</div>
+        </div>
+        <div style="font-size:11px;color:var(--text-muted);text-align:center;margin-top:6px;">
+          Integer array<br/>Vocab lookup
+        </div>
+      </div>
+
+      <div class="type-arrow">→</div>
+
+      <!-- Step 4 -->
+      <div class="type-step">
+        <div class="type-box">
+          <div class="type-label">Token Vectors</div>
+          <div class="type-name">float32[][]</div>
+          <div class="type-example">[[0.12,−0.43…]…]</div>
+        </div>
+        <div style="font-size:11px;color:var(--text-muted);text-align:center;margin-top:6px;">
+          N × 384 matrix<br/>Embedding table lookup
+        </div>
+      </div>
+
+      <div class="type-arrow">→</div>
+
+      <!-- Step 5 -->
+      <div class="type-step">
+        <div class="type-box">
+          <div class="type-label">Pooled Vector</div>
+          <div class="type-name">float32[]</div>
+          <div class="type-example">[0.44,−0.30…]</div>
+        </div>
+        <div style="font-size:11px;color:var(--text-muted);text-align:center;margin-top:6px;">
+          1 × 384 vector<br/>Mean pooling
+        </div>
+      </div>
+
+      <div class="type-arrow">→</div>
+
+      <!-- Step 6 -->
+      <div class="type-step">
+        <div class="type-box" style="border-color:rgba(79,142,247,0.4);">
+          <div class="type-label">Unit Vector ✓</div>
+          <div class="type-name" style="color:#10b981;">float32[]</div>
+          <div class="type-example">[0.37,−0.25…]</div>
+        </div>
+        <div style="font-size:11px;color:var(--text-muted);text-align:center;margin-top:6px;">
+          Normalized to length=1<br/>‖v‖ = 1.0
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detailed type breakdown table -->
+  <div class="card">
+    <h3 style="font-size:15px;font-weight:700;margin-bottom:16px;">🔬 Exact Types at Each Step</h3>
+    <table class="formula-table">
+      <thead>
+        <tr>
+          <th>Step</th>
+          <th>What Happens</th>
+          <th>Data Type</th>
+          <th>Shape (for "The cat sat")</th>
+          <th>Bytes Used</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="tag label-blue">1</span> Raw Text</td>
+          <td>User types a sentence</td>
+          <td class="mono">string (UTF-8)</td>
+          <td class="mono">1 string, 11 chars</td>
+          <td class="mono">~11 bytes</td>
+        </tr>
+        <tr>
+          <td><span class="tag label-purple">2</span> Tokens</td>
+          <td>Split into words/subwords</td>
+          <td class="mono">string[]</td>
+          <td class="mono">[N] → [3] tokens</td>
+          <td class="mono">~30 bytes</td>
+        </tr>
+        <tr>
+          <td><span class="tag label-cyan">3</span> Token IDs</td>
+          <td>Vocabulary lookup → integers</td>
+          <td class="mono">int64[]</td>
+          <td class="mono">[3] integers</td>
+          <td class="mono">24 bytes (3×8)</td>
+        </tr>
+        <tr>
+          <td><span class="tag label-orange">4</span> Token Vectors</td>
+          <td>Embedding matrix lookup</td>
+          <td class="mono">float32[][]</td>
+          <td class="mono">[3, 384] matrix</td>
+          <td class="mono">4,608 bytes</td>
+        </tr>
+        <tr>
+          <td><span class="tag label-green">5</span> Pooled Vector</td>
+          <td>Average across all tokens</td>
+          <td class="mono">float32[]</td>
+          <td class="mono">[384] vector</td>
+          <td class="mono">1,536 bytes</td>
+        </tr>
+        <tr>
+          <td><span class="tag label-green">6</span> Unit Vector</td>
+          <td>Divide by L2 norm</td>
+          <td class="mono">float32[]</td>
+          <td class="mono">[384] vector, ‖v‖=1</td>
+          <td class="mono">1,536 bytes</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+
+<!-- ╔══════════════════════════════════════════╗ -->
+<!-- ║   SECTION 3: LIVE TOKENIZATION DEMO     ║ -->
+<!-- ╚══════════════════════════════════════════╝ -->
+<section class="section" id="tokenize">
+  <div class="section-header">
+    <div class="section-number">SECTION 03</div>
+    <h2>Live <span class="gradient-text">Tokenization</span> Demo</h2>
+    <p class="section-desc">
+      Type any sentence below. Watch it get split into <strong>tokens</strong>, each assigned an
+      integer ID from our vocabulary. Hover a token chip to see its vector details.
+    </p>
+  </div>
+
+  <div class="card" style="margin-bottom:20px;">
+    <label style="font-size:12px;font-weight:600;color:var(--text-muted);letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:8px;">
+      YOUR SENTENCE
+    </label>
+    <input
+      id="tok-input"
+      class="demo-input"
+      type="text"
+      placeholder="Type a sentence… e.g. 'the cat is happy'"
+      value="the cat is happy"
+    />
+
+    <div style="display:flex;gap:20px;margin:12px 0;font-size:13px;color:var(--text-secondary);">
+      <span>Tokens: <strong style="color:var(--accent-blue);" id="tok-count">0</strong></span>
+      <span>Known: <strong style="color:var(--accent-green);" id="tok-known">0</strong></span>
+    </div>
+
+    <div id="tok-display" class="token-display"></div>
+
+    <div class="info-note" style="margin-top:12px;">
+      <strong>🔵 Blue chips</strong> = word is in our vocabulary.
+      <strong>🟠 Orange chips</strong> = unknown word → gets special <code>[UNK]</code> token (ID: 0).
+      In real models like MiniLM, unknown words are broken into <em>sub-word pieces</em> instead.
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:20px;">
+    <h3 style="font-size:14px;font-weight:700;margin-bottom:14px;">📋 Token → ID → Vector Lookup Table</h3>
+    <div id="tok-table"></div>
+  </div>
+
+  <div class="card">
+    <h3 style="font-size:14px;font-weight:700;margin-bottom:8px;">🧬 First Token's Embedding Vector (first 16 dimensions)</h3>
+    <div class="info-note" style="margin-bottom:10px;">
+      Each token maps to a row in the embedding matrix — a list of 16 floats (384 in real models).
+      <span style="color:#4ade80;">Green</span> = positive value, <span style="color:#f87171;">red</span> = negative.
+    </div>
+    <div id="tok-vec-wrap" class="vector-display"></div>
+  </div>
+</section>
+
+
+<!-- ╔══════════════════════════════════════════╗ -->
+<!-- ║   SECTION 4: HOW EMBEDDINGS ARE LEARNED ║ -->
+<!-- ╚══════════════════════════════════════════╝ -->
+<section class="section" id="learn">
+  <div class="section-header">
+    <div class="section-number">SECTION 04</div>
+    <h2>How Are Vectors <span class="gradient-text">Actually Learned?</span></h2>
+    <p class="section-desc">
+      We didn't hand-craft the numbers — a neural network <em>learned</em> them by reading
+      billions of sentences and adjusting values until similar words had similar vectors.
+    </p>
+  </div>
+
+  <div class="pipeline">
+    <div class="pipeline-step">
+      <div class="pipeline-marker">
+        <div class="pipeline-dot label-blue">1</div>
+        <div class="pipeline-line"></div>
+      </div>
+      <div class="pipeline-content">
+        <div class="pipeline-title">Massive Text Corpus (input)</div>
+        <div class="pipeline-body">
+          The model is fed billions of sentences: Wikipedia, books, websites.
+          Each word co-occurring with similar contexts starts getting nudged toward similar vectors.
+          <div style="margin-top:8px;">
+            <span class="tag label-blue">string</span>
+            "The cat sat on the mat. The dog sat by the door."
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pipeline-step">
+      <div class="pipeline-marker">
+        <div class="pipeline-dot label-purple">2</div>
+        <div class="pipeline-line"></div>
+      </div>
+      <div class="pipeline-content">
+        <div class="pipeline-title">Tokenization + Embedding Lookup</div>
+        <div class="pipeline-body">
+          Text → tokens → integer IDs → look up each ID's row in the embedding matrix
+          (a big table of random numbers, initially). The matrix starts as noise.
+          <div class="math-block" style="margin-top:10px;">
+            <div class="math-formula" style="font-size:1rem;">E ∈ ℝ^(V × d)</div>
+            <div class="math-explain">Embedding matrix: V = vocab size (30,000), d = dimensions (384)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pipeline-step">
+      <div class="pipeline-marker">
+        <div class="pipeline-dot label-cyan">3</div>
+        <div class="pipeline-line"></div>
+      </div>
+      <div class="pipeline-content">
+        <div class="pipeline-title">Transformer Layers (the neural network)</div>
+        <div class="pipeline-body">
+          The BERT/MiniLM architecture has layers of "attention" — each token
+          looks at all other tokens and decides which ones are relevant.
+          The article's MiniLM model has <strong>6 layers × 12 attention heads</strong>.
+        </div>
+      </div>
+    </div>
+
+    <div class="pipeline-step">
+      <div class="pipeline-marker">
+        <div class="pipeline-dot label-orange">4</div>
+        <div class="pipeline-line"></div>
+      </div>
+      <div class="pipeline-content">
+        <div class="pipeline-title">Loss Function → Backpropagation</div>
+        <div class="pipeline-body">
+          The model predicts a masked word, compares to the real word, measures error
+          (loss), then propagates gradients back through all layers — adjusting the
+          embedding matrix so similar words get closer vectors.
+          <div class="math-block" style="margin-top:10px;">
+            <div class="math-formula" style="font-size:1rem;">Δw = −η · ∇_w L</div>
+            <div class="math-explain">Weight update: η = learning rate, ∇L = gradient of loss</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pipeline-step">
+      <div class="pipeline-marker">
+        <div class="pipeline-dot label-green">5</div>
+      </div>
+      <div class="pipeline-content">
+        <div class="pipeline-title">Result: Meaningful Vector Space</div>
+        <div class="pipeline-body">
+          After training, the embedding matrix contains vectors where
+          <strong>direction = meaning</strong>.
+          <em>cat</em> and <em>dog</em> are close; <em>cat</em> and <em>algorithm</em> are far apart.
+          This is the matrix used at inference time.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ╔══════════════════════════════════════════╗ -->
+<!-- ║   SECTION 5: THE MATH                   ║ -->
+<!-- ╚══════════════════════════════════════════╝ -->
+<section class="section" id="math">
+  <div class="section-header">
+    <div class="section-number">SECTION 05</div>
+    <h2>The <span class="gradient-text">Math</span> Behind It</h2>
+    <p class="section-desc">
+      Three operations power text embeddings: the <strong>dot product</strong>, the
+      <strong>L2 norm</strong>, and <strong>cosine similarity</strong>. Let's understand each one.
+    </p>
+  </div>
+
+  <div class="grid-2" style="gap:20px; margin-bottom:24px;">
+    <!-- Dot Product -->
+    <div class="card">
+      <div style="font-size:1.2rem;font-weight:800;margin-bottom:12px;">① Dot Product</div>
+      <div class="math-block">
+        <div class="math-formula">A · B = Σ aᵢ × bᵢ</div>
+        <div class="math-formula" style="font-size:.9rem;color:var(--text-secondary);margin-top:6px;">
+          = a₁b₁ + a₂b₂ + … + aₙbₙ
+        </div>
+        <div class="math-explain">
+          <strong>What it means:</strong> Multiply matching elements of two vectors, then sum them all up.
+          A scalar (single number) result.<br/><br/>
+          <strong>Example:</strong> A=[1, 2, 3], B=[4, 5, 6]<br/>
+          A·B = (1×4) + (2×5) + (3×6) = 4 + 10 + 18 = <strong style="color:var(--accent-cyan);">32</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- L2 Norm -->
+    <div class="card">
+      <div style="font-size:1.2rem;font-weight:800;margin-bottom:12px;">② L2 Norm (Magnitude)</div>
+      <div class="math-block">
+        <div class="math-formula">‖v‖ = √(Σ vᵢ²)</div>
+        <div class="math-formula" style="font-size:.9rem;color:var(--text-secondary);margin-top:6px;">
+          = √(v₁² + v₂² + … + vₙ²)
+        </div>
+        <div class="math-explain">
+          <strong>What it means:</strong> The "length" of a vector — Pythagoras theorem in N dimensions.<br/><br/>
+          <strong>Example:</strong> v = [3, 4]<br/>
+          ‖v‖ = √(3² + 4²) = √(9 + 16) = √25 = <strong style="color:var(--accent-cyan);">5.0</strong><br/><br/>
+          <strong>Why?</strong> We divide by this to make ‖v̂‖ = 1 (unit vector).
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cosine Similarity (main) -->
+  <div class="card card-gradient" style="margin-bottom:24px;">
+    <div style="font-size:1.2rem;font-weight:800;margin-bottom:12px;">③ Cosine Similarity — The Key Formula</div>
+    <div class="math-block">
+      <div class="math-formula" style="font-size:1.6rem;">cos(θ) = (A · B) / (‖A‖ × ‖B‖)</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;">
+      <div>
+        <div style="font-size:13px;color:var(--text-secondary);line-height:1.7;">
+          <strong>What it measures:</strong> The angle θ between two vectors.<br/>
+          NOT how long the vectors are — only their <em>direction</em> matters.<br/><br/>
+          This means "I love cats" and "I really really love cats a lot" get
+          the same similarity score as "I love cats" vs "I love cats" — because
+          they point in the same direction!
+        </div>
+      </div>
+      <div>
+        <table class="formula-table" style="font-size:12px;">
+          <tr>
+            <th>cos(θ) value</th>
+            <th>Meaning</th>
+          </tr>
+          <tr>
+            <td class="mono" style="color:#10b981;">+1.0</td>
+            <td>Identical direction → same meaning</td>
+          </tr>
+          <tr>
+            <td class="mono" style="color:#fbbf24;">+0.5</td>
+            <td>Related (60° apart)</td>
+          </tr>
+          <tr>
+            <td class="mono" style="color:#94a3b8;">0.0</td>
+            <td>Unrelated (90° apart)</td>
+          </tr>
+          <tr>
+            <td class="mono" style="color:#f87171;">−1.0</td>
+            <td>Opposite meaning (180° apart)</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive angle demo -->
+  <div class="card">
+    <h3 style="font-size:14px;font-weight:700;margin-bottom:16px;">🎛️ Interactive: Drag to Change Angle</h3>
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:12px;flex-wrap:wrap;">
+      <label style="font-size:13px;color:var(--text-secondary);">Angle θ between A and B:</label>
+      <input type="range" id="angle-slider" min="0" max="180" value="45" style="
+        flex:1; min-width:200px; accent-color:var(--accent-blue);
+        height:4px; border-radius:4px; cursor:pointer;
+      "/>
+      <span id="angle-deg-label" style="font-family:'JetBrains Mono',monospace;color:var(--accent-cyan);font-weight:700;min-width:40px;">45°</span>
+    </div>
+    <div class="chart-wrap" style="height:200px;">
+      <canvas id="angle-canvas" style="width:100%;height:200px;"></canvas>
+    </div>
+    <div style="display:flex;gap:24px;margin-top:16px;flex-wrap:wrap;">
+      <div class="stat-card" style="flex:1;min-width:140px;">
+        <div class="stat-value" id="cos-output" style="font-size:1.8rem;">0.7071</div>
+        <div class="stat-label">Cosine Similarity</div>
+      </div>
+      <div class="stat-card" style="flex:1;min-width:140px;">
+        <div class="stat-value" id="dot-output" style="font-size:1.8rem;">0.7071</div>
+        <div class="stat-label">Dot Product (unit vectors)</div>
+      </div>
+    </div>
+    <div class="info-tip" style="margin-top:12px;">
+      💡 After L2 normalization, ‖A‖ = ‖B‖ = 1, so <strong>cos(θ) = A·B</strong> (just the dot product!).
+      This is why the article normalizes vectors before comparing them.
+    </div>
+  </div>
+</section>
+
+
+<!-- ╔══════════════════════════════════════════╗ -->
+<!-- ║   SECTION 6: EMBEDDING SPACE PLOT       ║ -->
+<!-- ╚══════════════════════════════════════════╝ -->
+<section class="section" id="space">
+  <div class="section-header">
+    <div class="section-number">SECTION 06</div>
+    <h2>The <span class="gradient-text">Embedding Space</span></h2>
+    <p class="section-desc">
+      Each word is a point in high-dimensional space. We use PCA (Principal Component Analysis)
+      to project from 16 dimensions down to 2D so we can <em>see</em> the clusters.
+      Try hovering the dots!
+    </p>
+  </div>
+
+  <div class="info-note" style="margin-bottom:20px;">
+    <strong>How PCA works (simplified):</strong> PCA finds the directions in high-dim space with the most
+    variation, then projects everything onto those 2 directions. Think of it like finding the best angle
+    to take a photo of a 3D object so you lose the least information.
+    The axes below correspond to the strongest semantic "directions" in our embedding space.
+  </div>
+
+  <div class="card chart-wrap" style="height:500px;padding:0;margin-bottom:20px;">
+    <canvas id="embed-space-canvas" style="width:100%;height:500px;"></canvas>
+  </div>
+
+  <div class="grid-3">
+    <div class="card" style="text-align:center;border-color:rgba(16,185,129,0.2);">
+      <div style="font-size:1.5rem;margin-bottom:4px;">🐾</div>
+      <div style="font-weight:700;color:#10b981;">Animals Cluster</div>
+      <div style="font-size:12px;color:var(--text-muted);">cat, dog, lion, bird…</div>
+    </div>
+    <div class="card" style="text-align:center;border-color:rgba(249,115,22,0.2);">
+      <div style="font-size:1.5rem;margin-bottom:4px;">🍕</div>
+      <div style="font-weight:700;color:#f97316;">Food Cluster</div>
+      <div style="font-size:12px;color:var(--text-muted);">pizza, sushi, coffee…</div>
+    </div>
+    <div class="card" style="text-align:center;border-color:rgba(79,142,247,0.2);">
+      <div style="font-size:1.5rem;margin-bottom:4px;">💻</div>
+      <div style="font-weight:700;color:#4f8ef7;">Tech Cluster</div>
+      <div style="font-size:12px;color:var(--text-muted);">algorithm, model, code…</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ╔══════════════════════════════════════════╗ -->
+<!-- ║   SECTION 7: SIMILARITY EXPLORER        ║ -->
+<!-- ╚══════════════════════════════════════════╝ -->
+<section class="section" id="similarity">
+  <div class="section-header">
+    <div class="section-number">SECTION 07</div>
+    <h2>Live <span class="gradient-text">Similarity Explorer</span></h2>
+    <p class="section-desc">
+      Type two sentences and get their cosine similarity score in real time.
+      The full pipeline runs: tokenize → embed → mean pool → normalize → cos(θ).
+    </p>
+  </div>
+
+  <!-- Input Row -->
+  <div class="compare-inputs">
+    <div>
+      <label style="font-size:11px;font-weight:700;color:var(--accent-blue);letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:6px;">Sentence A</label>
+      <input id="sim-input-a" class="demo-input" type="text" placeholder="e.g. I love my cat" />
+    </div>
+    <div class="vs-badge">VS</div>
+    <div>
+      <label style="font-size:11px;font-weight:700;color:var(--accent-pink);letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:6px;">Sentence B</label>
+      <input id="sim-input-b" class="demo-input" type="text" placeholder="e.g. My dog is happy" />
+    </div>
+  </div>
+
+  <div class="grid-2" style="gap:20px; margin-bottom:20px;">
+    <!-- Score Card -->
+    <div class="card card-gradient">
+      <div class="sim-score-display">
+        <div class="sim-number" id="sim-score-num">0.0000</div>
+        <div class="sim-label" id="sim-score-label" style="color:var(--accent-green);">–</div>
+        <div class="sim-bar-wrap">
+          <div class="sim-bar" id="sim-score-bar" style="width:50%;"></div>
+        </div>
+        <div class="sim-scale">
+          <span>-1 (Opposite)</span>
+          <span>0 (Unrelated)</span>
+          <span>+1 (Identical)</span>
+        </div>
+      </div>
+
+      <div class="info-note" style="margin-top:8px;font-size:12px;">
+        <strong>Formula used:</strong> cos(θ) = (A·B) / (‖A‖×‖B‖)<br/>
+        Both vectors are L2-normalized first, so bar shows (score+1)/2 × 100%
+      </div>
+    </div>
+
+    <!-- Vector Heatmaps -->
+    <div class="card">
+      <h3 style="font-size:13px;font-weight:700;margin-bottom:14px;">🌡️ Sentence Vectors (16-dim heatmap)</h3>
+      <div id="sim-heat-a" style="margin-bottom:12px;"></div>
+      <div id="sim-heat-b"></div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:8px;">
+        Dark green cells = large positive values. Dark red = large negative. Brighter = stronger.
+      </div>
+    </div>
+  </div>
+
+  <!-- Dimension Breakdown -->
+  <div class="card">
+    <h3 style="font-size:14px;font-weight:700;margin-bottom:4px;">📊 Where Does the Similarity Come From?</h3>
+    <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">
+      Each bar shows how much two semantic dimensions agree. Animals talking about animals → green bar high.
+    </p>
+    <div class="chart-wrap" style="height:200px;">
+      <canvas id="sim-bar-canvas" style="width:100%;height:200px;"></canvas>
+    </div>
+  </div>
+
+  <!-- Try these examples -->
+  <div style="margin-top:20px;">
+    <div style="font-size:12px;font-weight:700;color:var(--text-muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:12px;">
+      💡 TRY THESE PAIRS:
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="btn btn-secondary" onclick="setSimilarityPair('I love my cat', 'My dog is happy')">🐾 Animals (similar)</button>
+      <button class="btn btn-secondary" onclick="setSimilarityPair('machine learning model', 'neural network algorithm')">💻 Tech (similar)</button>
+      <button class="btn btn-secondary" onclick="setSimilarityPair('pizza is great food', 'I love to eat sushi')">🍕 Food (similar)</button>
+      <button class="btn btn-secondary" onclick="setSimilarityPair('cat dog animal', 'software code program')">🔀 Different topics</button>
+      <button class="btn btn-secondary" onclick="setSimilarityPair('happy great good excited', 'sad bad terrible angry')">😊😢 Opposites</button>
+    </div>
+  </div>
+</section>
+
+
+<!-- ╔══════════════════════════════════════════╗ -->
+<!-- ║   SECTION 8: MEAN POOLING ANIMATION     ║ -->
+<!-- ╚══════════════════════════════════════════╝ -->
+<section class="section" id="pooling">
+  <div class="section-header">
+    <div class="section-number">SECTION 08</div>
+    <h2>Mean <span class="gradient-text">Pooling</span> — Explained</h2>
+    <p class="section-desc">
+      After the transformer produces a vector for <em>each token</em>, we need
+      <em>one vector</em> for the whole sentence. Mean pooling averages them.
+    </p>
+  </div>
+
+  <div class="grid-2" style="gap:20px; margin-bottom:24px;">
+    <div class="card">
+      <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;">📐 The Formula</h3>
+      <div class="math-block">
+        <div class="math-formula">v_sent = (1/N) × Σ v_tᵢ</div>
+        <div class="math-explain" style="margin-top:12px;">
+          <strong>v_sent</strong> = sentence embedding vector<br/>
+          <strong>N</strong> = number of tokens<br/>
+          <strong>v_tᵢ</strong> = embedding vector for token i<br/><br/>
+          <strong>Step-by-step for 3 tokens, dim=2:</strong><br/>
+          Token 1: [0.2, 0.8]<br/>
+          Token 2: [0.6, 0.4]<br/>
+          Token 3: [0.4, 0.6]<br/>
+          ─────────────────<br/>
+          Sum:    [1.2, 1.8]<br/>
+          ÷ 3:   <strong style="color:var(--accent-cyan);">[0.4, 0.6]</strong>  ← pooled vector
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;">❓ Why Not Just Use [CLS] Token?</h3>
+      <div style="font-size:13px;color:var(--text-secondary);line-height:1.7;">
+        <p style="margin-bottom:10px;">
+          BERT-style models have a special [CLS] token at the start. In fine-tuned
+          models (like for classification), you'd use [CLS]. But for <em>sentence embeddings</em>,
+          mean pooling across all tokens usually works better because:
+        </p>
+        <ul style="padding-left:16px;display:flex;flex-direction:column;gap:6px;">
+          <li>It captures information from <strong>every word</strong></li>
+          <li>It's more robust to sentence length</li>
+          <li>[CLS] requires fine-tuning to be meaningful</li>
+          <li>MiniLM (the article's model) is trained specifically for mean pooling</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive pooling animation -->
+  <div class="card" style="margin-bottom:20px;">
+    <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;">🎬 Animated Pooling Walkthrough</h3>
+    <div style="display:flex;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap;">
+      <input id="pool-input" class="demo-input" type="text"
+             placeholder="Type a sentence…"
+             value="the cat sat"
+             style="flex:1;min-width:200px;" />
+      <button class="btn btn-primary" id="pool-btn">▶ Animate</button>
+    </div>
+    <div class="pool-canvas-wrap">
+      <canvas id="pool-canvas" style="width:100%;"></canvas>
+    </div>
+    <div class="info-note" style="margin-top:12px;font-size:12px;">
+      Each row = one token's vector (16 dimensions, shown as coloured cells).
+      Green = positive, red = negative. The pooled row averages all the values column-by-column.
+    </div>
+  </div>
+
+  <!-- Pooled result display -->
+  <div class="grid-2" style="gap:16px;">
+    <div class="card">
+      <h3 style="font-size:13px;font-weight:700;margin-bottom:8px;">Pooled Vector (before normalize)</h3>
+      <div id="pool-result" class="vector-display"></div>
+    </div>
+    <div class="card">
+      <h3 style="font-size:13px;font-weight:700;margin-bottom:8px;">After L2 Normalization (‖v‖=1)</h3>
+      <div id="pool-normalized" class="vector-display"></div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ╔══════════════════════════════════════════╗ -->
+<!-- ║   SECTION 9: THE FULL PIPELINE          ║ -->
+<!-- ╚══════════════════════════════════════════╝ -->
+<section class="section" id="pipeline">
+  <div class="section-header">
+    <div class="section-number">SECTION 09</div>
+    <h2>The Complete <span class="gradient-text">Pipeline</span></h2>
+    <p class="section-desc">
+      Here's everything together — the exact same steps the article's Rust/ONNX code runs,
+      but explained in plain English.
+    </p>
+  </div>
+
+  <div class="card card-gradient">
+    <div class="pipeline">
+      <div class="pipeline-step">
+        <div class="pipeline-marker">
+          <div class="pipeline-dot label-blue" style="font-size:18px;">🔤</div>
+          <div class="pipeline-line"></div>
+        </div>
+        <div class="pipeline-content">
+          <div class="pipeline-title">Step 1: Tokenize  <span class="tag label-blue" style="margin-left:8px;">string → string[]</span></div>
+          <div class="pipeline-body">
+            Split raw text into <em>tokens</em>. Real models use WordPiece or BPE (Byte-Pair Encoding)
+            to handle unknown words by splitting them into sub-words.
+            <code>"unbelievable"</code> → <code>["un", "##believ", "##able"]</code>
+          </div>
+        </div>
+      </div>
+
+      <div class="pipeline-step">
+        <div class="pipeline-marker">
+          <div class="pipeline-dot label-purple" style="font-size:18px;">🔢</div>
+          <div class="pipeline-line"></div>
+        </div>
+        <div class="pipeline-content">
+          <div class="pipeline-title">Step 2: Token IDs + Attention Mask  <span class="tag label-purple" style="margin-left:8px;">string[] → int64[]</span></div>
+          <div class="pipeline-body">
+            Look up each token in the vocabulary table. Also create an <strong>attention mask</strong>
+            (array of 1s and 0s) that tells the model which positions are real tokens vs padding.
+            The article's code creates <code>input_ids</code>, <code>attention_mask</code>, and
+            <code>token_type_ids</code> as three separate arrays.
+          </div>
+        </div>
+      </div>
+
+      <div class="pipeline-step">
+        <div class="pipeline-marker">
+          <div class="pipeline-dot label-cyan" style="font-size:18px;">🧠</div>
+          <div class="pipeline-line"></div>
+        </div>
+        <div class="pipeline-content">
+          <div class="pipeline-title">Step 3: ONNX Model Inference  <span class="tag label-cyan" style="margin-left:8px;">int64[] → float32[][]</span></div>
+          <div class="pipeline-body">
+            Pass the integer arrays into the MiniLM ONNX model. It runs all 6 transformer
+            layers and outputs a float32 tensor of shape <strong>[1, N, 384]</strong> — one
+            384-dim vector per token. The article uses ONNX Runtime for maximum speed.
+          </div>
+        </div>
+      </div>
+
+      <div class="pipeline-step">
+        <div class="pipeline-marker">
+          <div class="pipeline-dot label-orange" style="font-size:18px;">🏊</div>
+          <div class="pipeline-line"></div>
+        </div>
+        <div class="pipeline-content">
+          <div class="pipeline-title">Step 4: Mean Pooling  <span class="tag label-orange" style="margin-left:8px;">float32[][] → float32[]</span></div>
+          <div class="pipeline-body">
+            Average all N token vectors element-wise into a single <strong>[384]</strong> vector.
+            The article iterates over all token/dimension pairs and divides by seq_len.
+          </div>
+        </div>
+      </div>
+
+      <div class="pipeline-step">
+        <div class="pipeline-marker">
+          <div class="pipeline-dot label-green" style="font-size:18px;">✅</div>
+        </div>
+        <div class="pipeline-content">
+          <div class="pipeline-title">Step 5: L2 Normalize  <span class="tag label-green" style="margin-left:8px;">float32[] → unit float32[]</span></div>
+          <div class="pipeline-body">
+            Compute the L2 norm, then divide every element by it. Result: a unit vector
+            with ‖v‖ = 1.0. Now you can compute cosine similarity as a plain dot product.
+            The article returns this as <code>Vec&lt;f32&gt;</code> — a Rust vector of 32-bit floats.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="highlight-bar" style="margin-top:24px;">
+    <div class="hb-icon">🦀</div>
+    <div class="hb-text">
+      <strong>In the Rust article:</strong> the <code>embedd()</code> function (note: typo in original!)
+      does exactly these 5 steps. The output is <code>Vec&lt;f32&gt;</code> — a heap-allocated array
+      of 32-bit floats — which gets serialized to JSON and sent back as the API response.
+    </div>
+  </div>
+</section>
+
+
+<!-- ╔══════════════════════════════════════════╗ -->
+<!-- ║   SECTION 10: APPLICATIONS              ║ -->
+<!-- ╚══════════════════════════════════════════╝ -->
+<section class="section" id="applications">
+  <div class="section-header">
+    <div class="section-number">SECTION 10</div>
+    <h2>What Can You <span class="gradient-text">Build With This?</span></h2>
+    <p class="section-desc">
+      Text embeddings are the foundation of most modern NLP applications.
+    </p>
+  </div>
+
+  <div class="grid-auto">
+    <div class="card">
+      <div style="font-size:2rem;margin-bottom:10px;">🔍</div>
+      <div style="font-weight:700;margin-bottom:6px;">Semantic Search</div>
+      <div style="font-size:13px;color:var(--text-secondary);">
+        Find documents with similar meaning, not just matching keywords.
+        Stack Overflow, GitHub Copilot, and Notion AI all use this.
+      </div>
+    </div>
+    <div class="card">
+      <div style="font-size:2rem;margin-bottom:10px;">🤖</div>
+      <div style="font-weight:700;margin-bottom:6px;">RAG (Chat with Docs)</div>
+      <div style="font-size:13px;color:var(--text-secondary);">
+        Retrieve relevant document chunks via similarity, then feed them to an LLM.
+        ChatGPT plugins, Claude's context, all use retrieval via embeddings.
+      </div>
+    </div>
+    <div class="card">
+      <div style="font-size:2rem;margin-bottom:10px;">🏷️</div>
+      <div style="font-weight:700;margin-bottom:6px;">Text Classification</div>
+      <div style="font-size:13px;color:var(--text-secondary);">
+        Spam detection, sentiment analysis, topic labeling — train a simple classifier
+        on top of embeddings.
+      </div>
+    </div>
+    <div class="card">
+      <div style="font-size:2rem;margin-bottom:10px;">📌</div>
+      <div style="font-weight:700;margin-bottom:6px;">Recommendation</div>
+      <div style="font-size:13px;color:var(--text-secondary);">
+        "Users who liked X also liked Y" — if two product descriptions have high
+        cosine similarity, they're related.
+      </div>
+    </div>
+    <div class="card">
+      <div style="font-size:2rem;margin-bottom:10px;">🌐</div>
+      <div style="font-weight:700;margin-bottom:6px;">Multilingual Matching</div>
+      <div style="font-size:13px;color:var(--text-secondary);">
+        Multilingual models map "cat" (English) and "gato" (Spanish) to similar
+        vectors — allowing cross-language search.
+      </div>
+    </div>
+    <div class="card">
+      <div style="font-size:2rem;margin-bottom:10px;">🧩</div>
+      <div style="font-weight:700;margin-bottom:6px;">Deduplication</div>
+      <div style="font-size:13px;color:var(--text-secondary);">
+        Find near-duplicate content in large datasets. If cos(θ) > 0.95, the
+        texts are essentially the same.
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ╔══════════════════════════════════════════╗ -->
+<!-- ║                  FOOTER                 ║ -->
+<!-- ╚══════════════════════════════════════════╝ -->
+<footer class="footer">
+  <div style="margin-bottom:12px;">
+    <span class="gradient-text" style="font-weight:800;font-size:1.1rem;">⟨vec⟩ Text Embeddings</span>
+  </div>
+  <p>
+    Built as a learning project. Inspired by
+    <a href="https://dev.to/mayu2008/building-a-high-performance-text-embedding-api-with-rust-axum-and-onnx-12j4" target="_blank">
+      Building a High-Performance Text Embedding API with Rust, Axum and ONNX
+    </a>.
+  </p>
+  <p style="margin-top:8px;color:var(--text-muted);">
+    All embedding math runs in your browser (pure JS). No server needed. No data sent anywhere.<br/>
+    Open the browser console and try: <code>EmbeddingEngine.embedText("hello world")</code>
+  </p>
+</footer>
+
+<!-- ─── SCRIPTS ──────────────────────────────────────────── -->
+<script src="js/embeddings.js"></script>
+<script src="js/visualizer.js"></script>
+<script src="js/app.js"></script>
+
+<!-- Similarity pair helper -->
+<script>
+  function setSimilarityPair(a, b) {
+    const ia = document.getElementById('sim-input-a');
+    const ib = document.getElementById('sim-input-b');
+    if (ia) { ia.value = a; ia.dispatchEvent(new Event('input')); }
+    if (ib) { ib.value = b; ib.dispatchEvent(new Event('input')); }
+  }
+</script>
+
+</body>
+</html>

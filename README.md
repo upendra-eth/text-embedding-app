@@ -8,7 +8,7 @@ Learn how text gets transformed into numbers (vectors) for machine learning thro
 
 ---
 
-## 🎯 Features
+##  Features
 
 - **No Server Required:** All embedding math, tokenization, and vector manipulation runs entirely in the browser using pure JavaScript.
 - **Data Type Journey:** Trace the exact data transformations from `string` → `tokens` → `float32 vectors`.
@@ -18,7 +18,7 @@ Learn how text gets transformed into numbers (vectors) for machine learning thro
 - **Similarity Explorer:** Compare two sentences and get a live cosine similarity score with factor breakdowns.
 - **Animated Mean Pooling:** A step-by-step canvas animation showing how token vectors are averaged into a single sentence vector.
 
-## 🚀 How to Run Locally
+##  How to Run Locally
 
 You don't need any build tools or dependencies. Just serve the static files:
 
@@ -30,7 +30,7 @@ You don't need any build tools or dependencies. Just serve the static files:
 2. Open `index.html` in any modern web browser.
    *(Or spin up a simple local server if you prefer: `python -m http.server 8000`)*
 
-## 🧠 What You'll Learn
+##  What You'll Learn
 
 1. **What is an Embedding?** (The GPS and Colour analogies)
 2. **The Data Pipeline** (Strings to Vectors)
@@ -41,7 +41,7 @@ You don't need any build tools or dependencies. Just serve the static files:
 7. **Semantic Similarity Scoring**
 8. **Mean Pooling vs [CLS] Tokens**
 
-## 🛠️ Built With
+##  Built With
 
 - **HTML5 & Vanilla CSS** (Custom Dark-mode Glassmorphism UI)
 - **Vanilla JavaScript** (Custom Tokenizer and Embedding Engine)
